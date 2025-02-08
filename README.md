@@ -1,50 +1,84 @@
-Part 1: Overview and Objectives
+# Turborepo starter
 
-The objective is to create a Progressive Web Application (PWA) that functions as an e-commerce marketplace. This assessment should include key features for both customers and merchants, with a focus on performance and user experience. You have 7 days to complete this assessment, with additional consideration given for early completion.
+This Turborepo starter is maintained by the Turborepo core team.
 
-Part 2: Assessment Scope
+## Using this example
 
-The scope of this assessment is outlined as follows:
+Run the following command:
 
-- Fork this repository with your own github account.
-- E-commerce Marketplace PWA: Develop a simple Progressive Web Application with the essential functions of an e-commerce platform.
-- Timeframe: 7 days for assessment completion. Completing the assessment sooner is a plus.
+```sh
+npx create-turbo@latest
+```
 
-Part 3: Frontend Development
+## What's inside?
 
-The frontend requirements consist of two main components:
+This Turborepo includes the following packages/apps:
 
-- Customer Web Store: A responsive online store for customers to browse and purchase products.
-- Merchant Dashboard: A responsive dashboard for sellers to manage their products, orders, and account information.
-- Both components must be designed for seamless use on desktop and mobile devices.
+### Apps and Packages
 
-Part 4: Backend Development
+- `docs`: a [Next.js](https://nextjs.org/) app
+- `web`: another [Next.js](https://nextjs.org/) app
+- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
+- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
+- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
 
-The backend requirements include:
+Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
-- RESTful CRUD APIs: Create a set of RESTful APIs for managing product and order data.
-- Database Integration: Establish a database connection to store and retrieve transaction information.
-- Microservices (Bonus): If possible, structure the backend as a collection of microservices for scalability.
-- Ensure that the backend is implemented using industry-standard practices and follows best practices for security and performance.
+### Utilities
 
-Part 5: Integration and Testing
+This Turborepo has some additional tools already setup for you:
 
-Integration and testing requirements include:
+- [TypeScript](https://www.typescriptlang.org/) for static type checking
+- [ESLint](https://eslint.org/) for code linting
+- [Prettier](https://prettier.io) for code formatting
 
-- Test Data: Use the Fake Store API for initial data and test cases. Fake Store API https://fakestoreapi.com/
-- Stripe Integration (Bonus): Integrate with Stripe to simulate payment processing.
+### Build
 
-Part 6: Evaluation Criteria
+To build all apps and packages, run the following command:
 
-Your output will be assessed based on the following criteria:
+```
+cd my-turborepo
+pnpm build
+```
 
-- Functionality: Does the output meet the specified requirements and perform as expected?
-- Code Quality: Is the codebase clean, well-organized, and easy to maintain?
-- Testing: Are there sufficient tests to ensure reliability and stability?
-- Documentation: Is the output thoroughly documented, including setup instructions and usage guidelines?
-- Creativity: Did you incorporate any innovative features or add unique value to the output?
-- Problem-Solving: How effectively did you address and resolve issues that arose during development?
+### Develop
 
-Note: Using pre-made templates is not allowed and will result in disqualification. So is copying other PRs on this repo.
+To develop all apps and packages, run the following command:
 
-PR to this repo when you're done. Thank you for taking the time to do this assessment. 
+```
+cd my-turborepo
+pnpm dev
+```
+
+### Remote Caching
+
+> [!TIP]
+> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+
+Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+
+By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+
+```
+cd my-turborepo
+npx turbo login
+```
+
+This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+
+Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+
+```
+npx turbo link
+```
+
+## Useful Links
+
+Learn more about the power of Turborepo:
+
+- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
+- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
+- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
+- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
+- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
+- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)
