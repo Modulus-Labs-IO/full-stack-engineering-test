@@ -1,0 +1,30 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "migration:generate": {
+      "dependsOn": ["^migration:generate"]
+    },
+    "migration:run": {
+      "dependsOn": ["^migration:run"]
+    },
+    "migration:revert": {
+      "dependsOn": ["^migration:revert"]
+    }
+  }
+}

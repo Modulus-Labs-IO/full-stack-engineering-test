@@ -1,0 +1,59 @@
+export interface Product {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+  description: string;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface SignupCredentials {
+  name: string;
+  role: string;
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  access_token: string;
+}
+
+interface OrderItem {
+  id: string
+  quantity: number
+  price: string
+  created_at: string
+  product: {
+    id: string
+    name: string
+    price: string
+    stock: number
+    description: string
+  }
+}
+
+export interface Order {
+  id: string
+  status: string
+  totalPrice: string
+  items: OrderItem[]
+}
+
+export interface DecodedToken {
+  email: string;
+  name: string;
+  sub: string;
+  role: string;
+  iat: number;
+  exp: number;
+}
