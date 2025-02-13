@@ -38,7 +38,7 @@ export default function LoginForm() {
       const { role } =await login(validatedData.email, validatedData.password)
       toast.success("Logged in successfully!")
       if (role === "merchant") {
-        router.push("/dashboard")
+        router.push("/dashboard/merchant")
       } else {
         router.push("/")
       }
