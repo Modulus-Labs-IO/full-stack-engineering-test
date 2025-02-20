@@ -9,9 +9,13 @@
   const total_carts = ref<any>(0)
 
   onMounted(async () => {
-    const { data: _user_carts }: any = await useFetch('https://fakestoreapi.com/carts/user/2')
-    console.log('_user_carts ', _user_carts.value)
-    user_carts.value = _user_carts.value
+    let cart = JSON.parse(localStorage.getItem('cart'))
+    if (cart.length) {
+      user_carts.value = cart
+    } else {
+      const { data: _user_carts }: any = await useFetch('https://fakestoreapi.com/carts/user/2')
+      user_carts.value = _user_carts.value
+    }
     await processCart()
   })
 
@@ -21,19 +25,19 @@
         const _product = products.value.find((item: any) => item.id === product.productId )
         console.log(_product)
         if (_product) {
+          user_carts.value[userIndex].products[productIndex].status = 'pending'
           user_carts.value[userIndex].products[productIndex].item = _product 
           total_carts.value = total_carts.value + (_product.price * product.quantity)
         }
       })
     })
-    console.log('user_carts ', user_carts.value)
-    console.log('total_carts ', total_carts.value)
 
     if(!user_carts.value) {
       const { data: _user_carts }: any = await useFetch('https://fakestoreapi.com/carts/user/2')
-      console.log('_user_carts ', _user_carts.value)
       user_carts.value = _user_carts.value
       await processCart()
+    } else {
+      localStorage.setItem('cart',JSON.stringify(user_carts.value))
     }
   }
 
@@ -53,18 +57,6 @@
     total_carts.value = 0
     user_carts.value.push(responseData.value)
     await processCart()
-    // user_carts.value?.map((user: any, userIndex: any) => {
-    //   user.products?.map((product: any, productIndex: any) => {
-    //     const _product = products.value.find((item: any) => item.id === product.productId )
-    //     console.log(_product)
-    //     if (_product) {
-    //       user_carts.value[userIndex].products[productIndex].item = _product 
-    //       total_carts.value = total_carts.value + (_product.price * product.quantity)
-    //     }
-    //   })
-    // })
-    // console.log('user_carts ', user_carts.value)
-    console.log('toast ', toast)
 
     toast.add({
       id: 'successfully_added',
@@ -74,6 +66,10 @@
       timeout: 6000,
       color:'green'
     })
+}
+
+function browseProduct(item: any) {
+  navigateTo('/customer/'+item.id)
 }
 
 </script>
@@ -97,7 +93,6 @@
                 :title="item.title"
                 :description="item.description.slice(0,100)+'...'"
                 :price="`$${item.price}`"
-                discount=""
                 cycle="/piece"
                 :highlight="index === 0 ? true : false"
                 :badge="index === 0 ? { label: 'Most popular' } : undefined"
@@ -105,7 +100,19 @@
                 orientation="vertical"
                 align="bottom"
                 :features="[`Rating: ${item.rating.rate+95}%`, `Sold: ${item.rating.count}`]"
-              />
+              >
+              <template #title>
+                <UButton
+                  class="px-0"
+                  color="gray"
+                  variant="ghost"
+                  square
+                  @click="browseProduct(item)"
+                >
+                  <span class="text-2xl">{{ item.title }}</span>
+                </UButton>
+              </template>
+            </UPricingCard>
             </div>
             <UDashboardCard title="Cart Summary">
                 <div class="space-y-4">
