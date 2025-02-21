@@ -2,18 +2,20 @@
   const toast = useToast()
 
   const { data } = await useFetch('https://fakestoreapi.com/products')
-  console.log('data ', data.value)
 
   const products = ref<any>(data.value)
   const user_carts = ref<any>(null)
   const total_carts = ref<any>(0)
+  const userId = ref<any>()
 
   onMounted(async () => {
     let cart = JSON.parse(localStorage.getItem('cart'))
-    if (cart.length) {
-      user_carts.value = cart
+    let user = JSON.parse(localStorage.getItem('user'))
+    userId.value =  Number(atob(user.i))
+    if (cart?.length) {
+      user_carts.value = cart?.filter((_cart: any) => _cart?.userId === userId.value)
     } else {
-      const { data: _user_carts }: any = await useFetch('https://fakestoreapi.com/carts/user/2')
+      const { data: _user_carts }: any = await useFetch('https://fakestoreapi.com/carts/user/' + userId.value)
       user_carts.value = _user_carts.value
     }
     await processCart()
@@ -23,17 +25,19 @@
     user_carts.value?.map((user: any, userIndex: any) => {
       user.products?.map((product: any, productIndex: any) => {
         const _product = products.value.find((item: any) => item.id === product.productId )
-        console.log(_product)
         if (_product) {
-          user_carts.value[userIndex].products[productIndex].status = 'pending'
-          user_carts.value[userIndex].products[productIndex].item = _product 
+          if (!user_carts.value[userIndex].products[productIndex].status) {
+            user_carts.value[userIndex].products[productIndex].status = 'pending'
+          }
+          user_carts.value[userIndex].products[productIndex].item = _product
+
           total_carts.value = total_carts.value + (_product.price * product.quantity)
         }
       })
     })
 
     if(!user_carts.value) {
-      const { data: _user_carts }: any = await useFetch('https://fakestoreapi.com/carts/user/2')
+      const { data: _user_carts }: any = await useFetch('https://fakestoreapi.com/carts/user/' + userId.value)
       user_carts.value = _user_carts.value
       await processCart()
     } else {
@@ -53,7 +57,6 @@
         )
     })
 
-    console.log(responseData.value)
     total_carts.value = 0
     user_carts.value.push(responseData.value)
     await processCart()
@@ -72,6 +75,53 @@ function browseProduct(item: any) {
   navigateTo('/customer/'+item.id)
 }
 
+async function checkout() {
+  const lineItems: any = []
+  user_carts.value.map((cart: any) => {
+    cart.products.map((product: any) => {
+      lineItems.push({
+        price_data: {
+            currency: "usd",
+            product_data: {
+                name: product.item.title
+            },
+            unit_amount: 100
+        },
+        quantity: 1
+      })
+    })
+  })
+  try {
+    const response = await fetch('/api/stripe/create-payment-session-checkout', {
+      method: 'POST',
+      body: JSON.stringify({
+          lineItems,
+          stripeCustomerId: "cus_PWeGlWEJRNusqk",
+          orderId: "67459782bbbfd9438345e87d"
+      }),
+    })
+    const session = await response.json()
+
+    const { loadStripe } = await import('@stripe/stripe-js')
+    const stripePromise = loadStripe("pk_test_51N11SyBMH61eA80ajuHeOoRt5V2mHrsYOuGhHoqrl1kOGd9L5FVFxv7HuuRZ7gPiWFT0mGlxH1njsYwfRJFTNlu800aLMYDWKp")
+    const stripe = await stripePromise
+    const result = await stripe?.redirectToCheckout({ sessionId: session.sessionId })
+
+    if (result?.error) {
+      //
+    }
+  } catch (error) {
+    toast.add({
+        id: 'invalid_login',
+        title: 'Invalid Stripe!',
+        description: 'Please try again.',
+        icon: 'i-heroicons-check-circle',
+        timeout: 6000,
+        color: 'red',
+    })
+  }
+}
+
 </script>
 
 <template>
@@ -81,7 +131,7 @@ function browseProduct(item: any) {
       <UDashboardPanel grow>
         <UDashboardNavbar title="Shopping Cart">
           <template #right>
-            
+            <AppButtonBack />
           </template>
         </UDashboardNavbar>
 
@@ -132,7 +182,8 @@ function browseProduct(item: any) {
                   <dd class="text-base font-bold text-gray-900 dark:text-white">{{ '$'+total_carts.toFixed(2) }}</dd>
                 </dl>
 
-                <a href="#" class="flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Proceed to Checkout</a>
+                <a href="#" class="flex w-full items-center justify-center rounded-lg bg-primary-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                  @click="checkout()">Proceed to Checkout</a>
             </UDashboardCard>
           </div>
         </UDashboardPanelContent>

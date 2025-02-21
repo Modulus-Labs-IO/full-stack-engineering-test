@@ -1,7 +1,7 @@
 <template>
   <div>
     <AppHeader />
-    <CustomerCart />
+    <MerchantProducts />
   </div>
 </template>
 

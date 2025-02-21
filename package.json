@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "@nuxt/ui-pro": "^1.7.0",
+    "@stripe/stripe-js": "^5.6.0",
     "nuxt": "^3.15.4",
+    "stripe": "^17.6.0",
     "vue": "latest",
     "vue-router": "latest"
   },
