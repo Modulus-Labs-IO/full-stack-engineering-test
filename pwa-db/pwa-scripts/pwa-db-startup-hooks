@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+#force the script to run from its directory
+cd "$(dirname "$0")"
+
+# include common_functiions
+. lib/common_functions
+
+# include our PWA configuration
+. /pwa-config/pwa-databases.conf
+
+for i in "${!DATABASES[@]}"; do
+  create_user_and_database_if_not_exist ${DATABASES[i]} $POSTGRES_USER
+  ensure_uuid_extension ${DATABASES[i]} $POSTGRES_USER
+
+ 	for container in $(echo "${CONTAINERS[i]}" | tr ',' ' '); do
+		add_hba_conf_rule_if_not_exists ${DATABASES[i]} $container
+	done
+
+done
+
+pg_ctl reload
+echo "PWA startup hooks complete"
+
+
