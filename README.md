@@ -1,50 +1,55 @@
-Part 1: Overview and Objectives
+# Project Attempt: E-commerce Marketplace PWA
 
-The objective is to create a Progressive Web Application (PWA) that functions as an e-commerce marketplace. This assessment should include key features for both customers and merchants, with a focus on performance and user experience. You have 2 days to complete this assessment, with additional consideration given for early completion.
+## Disclaimer
+Due to time constraints and managing a full-time job, I was unable to fully complete this task. However, I wanted to share my attempt at the exercise. I hope this provides some insight into my approach and thought process.
 
-Part 2: Assessment Scope
+## Project Overview
+This project follows a microservices architecture, consisting of the following components:
 
-The scope of this assessment is outlined as follows:
+1. **pwa-api-gateway** - Acts as the API gateway for routing requests to the appropriate services.
+2. **pwa-core** - Handles business logic and core functionalities.
+3. **pwa-db** - Manages data persistence and database interactions.
+4. **pwa-ui** - Provides the front-end user interface.
 
-- Fork this repository with your own github account.
-- E-commerce Marketplace PWA: Develop a simple Progressive Web Application with the essential functions of an e-commerce platform.
-- Timeframe: 2 days for assessment completion. Completing the assessment sooner is a plus.
+## Technologies Used
+- **Microservices Architecture**
+- **Node.js**
+- **Database** (PostgreSQL)
+- **React**
+- **Docker** (for containerization)
 
-Part 3: Frontend Development
+## Setup Instructions
 
-The frontend requirements consist of two main components:
+1. in your linux envinronment with docker engine installed, Clone the repository:
+    ```sh
+    git clone <repository-url>
+    ```
 
-- Customer Web Store: A responsive online store for customers to browse and purchase products.
-- Merchant Dashboard: A responsive dashboard for sellers to manage their products, orders, and account information.
-- Both components must be designed for seamless use on desktop and mobile devices.
+2. create docker network
+    ```
+    docker network create --subnet 172.18.0.0/16 pwa_network
+    ```
 
-Part 4: Backend Development
+3. cd inside the repo and bring up the server
+    ```
+    docker compose up -d
+    ```
+4. if your linux envinronment ip adddress is accessible for example 192.168.1.x open your browser and open
+    ```
+    https://192.168.1.100
+    ```
+5. to stop the server command
+    ```
+    docker compose down
+    ```
 
-The backend requirements include:
+## Future Enhancements
+If time permits, these areas could be improved:
 
-- RESTful CRUD APIs: Create a set of RESTful APIs for managing product and order data.
-- Database Integration: Establish a database connection to store and retrieve transaction information.
-- Microservices (Bonus): If possible, structure the backend as a collection of microservices for scalability.
-- Ensure that the backend is implemented using industry-standard practices and follows best practices for security and performance.
+- Complete implementation of all microservices, created the container to discover all containers and register them automatically to kong gateway
+- Integration with authentication mechanisms
+- Improved error handling and logging
+- Comprehensive testing
 
-Part 5: Integration and Testing
-
-Integration and testing requirements include:
-
-- Test Data: Use the Fake Store API for initial data and test cases. Fake Store API https://fakestoreapi.com/
-- Stripe Integration (Bonus): Integrate with Stripe to simulate payment processing.
-
-Part 6: Evaluation Criteria
-
-Your output will be assessed based on the following criteria:
-
-- Functionality: Does the output meet the specified requirements and perform as expected?
-- Code Quality: Is the codebase clean, well-organized, and easy to maintain?
-- Testing: Are there sufficient tests to ensure reliability and stability?
-- Documentation: Is the output thoroughly documented, including setup instructions and usage guidelines?
-- Creativity: Did you incorporate any innovative features or add unique value to the output?
-- Problem-Solving: How effectively did you address and resolve issues that arose during development?
-
-Note: Using pre-made templates is not allowed and will result in disqualification. So is copying other PRs on this repo.
-
-PR to this repo when you're done. Thank you for taking the time to do this assessment. 
+## Conclusion
+While this project is incomplete, I hope it serves as a useful reference. Feel free to explore and contribute as needed. Thanks for reviewing my work!

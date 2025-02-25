@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+
+# Echoes "1" if database already exists.
+function does_database_exist() {
+  local database=$1
+  psql -tAc "SELECT 1 FROM pg_database WHERE datname='$database'" postgres dbadmin
+}
+
+function create_user_and_database() {
+  local database=$1
+  local POSTGRES_USER=$2
+
+  psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
+	    CREATE USER $database;
+	    CREATE DATABASE $database;
+	    GRANT ALL PRIVILEGES ON DATABASE $database TO $database;
+EOSQL
+}
+
+function create_user_and_database_if_not_exist() {
+  local database=$1
+  local POSTGRES_USER=$2
+
+  local exists=$(does_database_exist "$database")
+
+  if [ "$exists" != "1" ]; then
+    echo "  Creating user and database '$database'"
+    create_user_and_database $database $POSTGRES_USER
+  else
+    echo "  Database $database already exists"
+  fi
+}
+
+function add_hba_rule() {
+  local DATABASE_NAME=$1      # e.g. appmanager
+  local CONTAINER_HOSTNAME=$2 # e.g. app-manager
+
+  # e.g. the app_hba.conf should look something like the below
+  # host appmanager all app-manager.pwa_network trust
+
+  echo "host" ${DATABASE_NAME} "all" ${CONTAINER_HOSTNAME} "trust" >>/var/lib/postgresql/data/pg_hba.conf
+}
+
+function add_hba_conf_rule_if_not_exists() {
+
+  local DATABASE_NAME=$1  # e.g. appmanager
+  local CONTAINER_NAME=$2 # e.g. app-manager
+
+  local NETWORK_NAME=pwa_network
+  local CONTAINER_HOSTNAME=${CONTAINER_NAME}.${NETWORK_NAME} 
+  local HBA_FILE_PATH=/var/lib/postgresql/data/pg_hba.conf
+
+  grep "^host *${DATABASE_NAME} *all ${CONTAINER_HOSTNAME} * trust" "$HBA_FILE_PATH" >/dev/null
+  if [ "$?" != "0" ]; then
+    echo "  Adding new HBA rule for database $DATABASE_NAME, container: $CONTAINER_NAME"
+    add_hba_rule "$DATABASE_NAME" "$CONTAINER_HOSTNAME"
+  fi
+}
+
+function ensure_uuid_extension() {
+  local database=$1
+  local POSTGRES_USER=$2
+
+  psql -v ON_ERROR_STOP=1 --dbname "$database" --username "$POSTGRES_USER" <<-EOSQL
+	    CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+EOSQL
+}

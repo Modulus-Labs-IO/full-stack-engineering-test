@@ -1,0 +1,120 @@
+version: '3.9'
+
+services:
+  kong-migrations:
+    build: ./pwa-api-gateway
+    container_name: kong-migrations
+    labels:
+      - pwa.service.description='PWA KONG migrations service'
+    command: kong migrations bootstrap
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_DATABASE: kong
+      KONG_PG_HOST: ${DB_CONTAINER}
+      KONG_PG_PASSWORD: ${DB_PASSWORD}
+      KONG_PG_USER: ${DB_USERNAME}
+    networks:
+      - pwa_network
+    restart: on-failure
+
+  kong-migrations-up:
+    build: ./pwa-api-gateway
+    container_name: kong-migrations-up
+    labels:
+      - pwa.service.description='PWA KONG migrations up service'
+    command: kong migrations up && kong migrations finish
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_DATABASE: kong
+      KONG_PG_HOST: ${DB_CONTAINER}
+      KONG_PG_PASSWORD: ${DB_PASSWORD}
+      KONG_PG_USER: ${DB_USERNAME}
+    networks:
+      - pwa_network
+
+  kong:
+    build: ./pwa-api-gateway
+    container_name: kong
+    labels:
+      - pwa.service.description='PWA KONG gateway service'
+    environment:
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: '0.0.0.0:8001'
+      KONG_DATABASE: postgres
+      KONG_PG_DATABASE: kong
+      KONG_PG_HOST: ${DB_CONTAINER}
+      KONG_PG_PASSWORD: ${DB_PASSWORD}
+      KONG_PG_USER: ${DB_USERNAME}
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_NGINX_HTTP_SSL_PROTOCOLS: 'TLSv1.2 TLSv1.3'
+    volumes:
+      - ${BIND_MOUNT_ROOT}/certs:/certs
+    ports:
+      - 80:8080
+      - 443:8443
+    networks:
+      - pwa_network
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    restart: on-failure
+
+  pwa-db:
+    build: ./pwa-db
+    container_name: ${DB_CONTAINER}
+    labels:
+      - pwa.service.description='PWA Postgres 11.6 service'
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ${BIND_MOUNT_ROOT}/data/postgresql:/var/lib/postgresql/data
+      - ${BIND_MOUNT_ROOT}/config/pwa-db:/pwa-config
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DB_USERNAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pwa_network
+    restart: always
+
+  pwa-ui:
+    build: ./pwa-ui
+    container_name: pwa-ui
+    labels:
+      - pwa.service.description='PWA Frontend'     
+    networks:
+      - pwa_network    
+    restart: always
+
+  pwa-core:
+    build: ./pwa-core
+    container_name: pwa-core
+    labels:
+      - pwa.service.description='PWA Backend'     
+    networks:
+      - pwa_network    
+    restart: always    
+
+  konga:
+    image: pantsel/konga
+    container_name: konga
+    labels:
+      - pwa.service.description='PWA KONG Admin UI'    
+    environment:
+      NODE_ENV: development   
+      TOKEN_SECRET: abcdefghijklmnopqrstuvwxyz0123456789
+    ports:
+      - 1337:1337 #<external>:<internal> 
+    networks:
+      - pwa_network
+
+networks:
+  pwa_network:
+    external:
+      name: pwa_network

@@ -1,0 +1,37 @@
+#! /bin/bash
+
+#force the script to run from its directory
+cd "$(dirname "$0")"
+
+# include common_functiions
+. lib/common_functions
+
+POSTGRES_USER=dbadmin
+
+if [ -z "$1" ]; then
+  echo "First argument must be the container name (e.g. app-manager)"
+  exit 10
+fi
+CONTAINER_NAME=$1
+
+if [ -z "$2" ]; then
+  echo "Second argument must be the DB name"
+  exit 10
+fi
+DB_NAME=$2
+
+echo "Creating Database and user"
+echo "=========================="
+create_user_and_database_if_not_exist "$DB_NAME" "$POSTGRES_USER"
+
+echo "Adding HBA rule"
+echo "==============="
+add_hba_conf_rule_if_not_exists $DB_NAME $CONTAINER_NAME
+
+
+echo
+
+# pg_ctl cannot be run as root:
+runuser -u postgres pg_ctl reload
+echo "Done."
+echo

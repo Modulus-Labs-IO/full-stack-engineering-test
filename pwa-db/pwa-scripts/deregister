@@ -1,0 +1,29 @@
+#! /bin/bash
+
+delete_hba_conf_app_rule() {
+    local CONTAINER_NAME=$1  # e.g. nma
+
+    local NETWORK_NAME=pwa_network
+    local CONTAINER_HOSTNAME=${CONTAINER_NAME}.${NETWORK_NAME} 
+
+    local SED_COMMAND="/${CONTAINER_HOSTNAME}/ d"
+
+    sed -i "${SED_COMMAND}" /var/lib/postgresql/data/pg_hba.conf
+}
+
+if [ -z "$1" ]; then
+  echo "First argument must be the container name (e.g. app-manager)"
+  exit 10
+fi
+CONTAINER_NAME=$1
+
+echo "Removing HBA rule"
+echo "==============="
+delete_hba_conf_app_rule $CONTAINER_NAME
+
+echo
+
+# pg_ctl cannot be run as root:
+runuser -u postgres pg_ctl reload
+echo "Done."
+echo
